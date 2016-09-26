@@ -1,0 +1,269 @@
+% Issues to be solved
+% - ":" After authors
+% - Add comma before "Hrsg." (LNI is not constent here, but comma should be added)
+% - "and others" from the bibliography is not printed
+% - "(besucht am X)" should be ", Stand: X"
+% - One letter too much if only one author shown (Az09 vs. Azu+09; Gl09 vs. Glu09)
+% - Label for more than 3 names should be first firstname, not first three names -> Wa instead of WFE+ for Wasser, Feuer, Erde, Licht
+
+\usepackage[
+  bibstyle      = alphabetic,
+  citestyle     = alphabetic,
+  backend       = biber, %biber dose not work with 64x versions alternative: bibtex8
+                         % minalphanames only works with biber backend
+  sortcites     = true,
+  giveninits    = true,
+  useprefix     = false, %"von, van, etc." will be printed, too. See below.
+  minnames      = 1,
+  minalphanames = 3,
+  maxalphanames = 3,
+  maxbibnames   = 99,
+  maxcitenames  = 3,
+%  natbib        = true,
+  eprint        = true,
+  url           = true,
+  doi           = false,
+  isbn          = true,
+  backref       = false]{biblatex}
+\bibliography{bibliography}
+
+%%% BEGIN: LNI biblatex style
+
+\DeclareNameFormat{LNI}{%
+  \usebibmacro{name:family-given}
+          {\namepartfamily}
+          {\namepartgiveni}
+          {\namepartprefix}
+          {\namepartsuffix}
+  \ifthenelse{\value{listcount}<\value{liststop}}
+    {\addsemicolon\space}%
+{}%
+}
+\DeclareNameAlias{author}{LNI}
+\DeclareNameAlias{editor}{LNI}
+\DeclareNameAlias{byeditor}{LNI}
+\DeclareNameAlias{translator}{LNI}
+
+\DeclareDelimFormat{nametitledelim}{\addcolon\space}
+
+\newbibmacro*{byeditor+others}{%
+  \ifnameundef{editor}
+    {}
+    {(\printnames[byeditor]{editor}%
+     \clearname{editor}%
+     \setunit{\addspace}%
+     \usebibmacro{byeditor+othersstrg})%
+     \newunit}%
+  \usebibmacro{byeditorx}%
+  \usebibmacro{bytranslator+others}}
+  
+
+\newbibmacro{publisher+location}{%
+    {\printlist{publisher}%
+      \iflistundef{location}
+        {}
+        {\addcomma\addspace\printlist{location}}%
+     \addcomma\addspace%
+    }%
+}
+
+\newbibmacro*{author+others/translator+others}{%
+  \ifboolexpr{
+    test \ifuseauthor
+    and
+    not test {\ifnameundef{author}}
+  }
+    {\usebibmacro{author+others}}
+    {\usebibmacro{translator+others}}}
+
+
+\DeclareBibliographyDriver{book}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \ifnameundef{author}
+    {\printnames{editor}}
+    {\printnames{author}}%
+  %\setunit*{\labelnamepunct}\newblock%
+  %\setunit{\printdelim{nametitledelim}}\newblock%
+  \addcolon\space
+  \usebibmacro{title}%
+  \newunit%
+  \usebibmacro{publisher+location}%
+  \setunit{\addspace}
+  \printfield{year}%
+  \newunit\newblock
+  \usebibmacro{addendum+pubstate}%
+  \setunit{\bibpagerefpunct}\newblock
+  \usebibmacro{pageref}%
+  \newunit\newblock
+  \iftoggle{bbx:related}
+    {\usebibmacro{related:init}%
+     \usebibmacro{related}}
+    {}%
+  \nopunct%
+  \usebibmacro{finentry}%
+}
+
+\DeclareBibliographyDriver{inproceedings}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{author/translator+others}%
+  \setunit{\printdelim{nametitledelim}}\newblock
+  \usebibmacro{title}%
+  \newunit
+  \printlist{language}%
+  \newunit\newblock
+  \usebibmacro{byauthor}%
+  \newunit\newblock
+  \printtext{\bibstring{in}}
+  \usebibmacro{byeditor+others}%
+  :%
+  \newunit\newblock
+  \usebibmacro{maintitle+booktitle}%
+  \newunit\newblock
+  \usebibmacro{event+venue+date}%
+  \newunit\newblock
+  \iffieldundef{maintitle}
+    {\printfield{volume}%
+     \printfield{part}}
+    {}%
+  \newunit
+  \printfield{volumes}%
+  \newunit\newblock
+  \usebibmacro{series+number}%
+  \newunit\newblock
+  \printfield{note}%
+  \newunit\newblock
+  \printlist{organization}%
+  \newunit
+  \usebibmacro{publisher+location}%
+  \newunit\newblock
+  \usebibmacro{chapter+pages}%
+  \newunit
+  \addcomma\addspace
+  \usebibmacro{date}%
+  \newunit\newblock
+  \iftoggle{bbx:isbn}
+    {\printfield{isbn}}
+    {}%
+  \newunit\newblock
+  \usebibmacro{doi+eprint+url}%
+  \newunit\newblock
+  \usebibmacro{addendum+pubstate}%
+  \setunit{\bibpagerefpunct}\newblock
+  \usebibmacro{pageref}%
+  \newunit\newblock
+  \iftoggle{bbx:related}
+    {\usebibmacro{related:init}%
+     \usebibmacro{related}}
+    {}%
+  \usebibmacro{finentry}}
+  
+\DeclareBibliographyDriver{inbook}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{author/translator+others}%
+  \setunit{\printdelim{nametitledelim}}\newblock
+  \usebibmacro{title}%
+  \newunit
+  \printlist{language}%
+  \newunit\newblock
+  \usebibmacro{byauthor}%
+  \newunit\newblock
+  \printtext{\bibstring{in}}
+  \usebibmacro{byeditor+others}%
+  :%
+  \newunit\newblock
+  \usebibmacro{maintitle+booktitle}%
+  \newunit\newblock
+  \newunit\newblock
+  \printfield{edition}%
+  \newunit
+  \iffieldundef{maintitle}
+    {\printfield{volume}%
+     \printfield{part}}
+    {}%
+  \newunit
+  \printfield{volumes}%
+  \newunit\newblock
+  \usebibmacro{series+number}%
+  \newunit\newblock
+  \printfield{note}%
+  \newunit\newblock
+  \usebibmacro{publisher+location+date}%
+  \newunit\newblock
+  \usebibmacro{chapter+pages}%
+  \newunit\newblock
+  \iftoggle{bbx:isbn}
+    {\printfield{isbn}}
+    {}%
+  \newunit\newblock
+  \usebibmacro{doi+eprint+url}%
+  \newunit\newblock
+  \usebibmacro{addendum+pubstate}%
+  \setunit{\bibpagerefpunct}\newblock
+  \usebibmacro{pageref}%
+  \newunit\newblock
+  \iftoggle{bbx:related}
+    {\usebibmacro{related:init}%
+     \usebibmacro{related}}
+    {}%
+  \usebibmacro{finentry}}
+
+\DeclareBibliographyDriver{article}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{author/translator+others}%
+  \setunit{\printdelim{nametitledelim}}\newblock
+  \usebibmacro{title}%
+  \newunit
+  \printlist{language}%
+  \newunit\newblock
+  \usebibmacro{byauthor}%
+  \newunit\newblock
+  \usebibmacro{bytranslator+others}%
+  \newunit\newblock
+  \printfield{version}%
+  \newunit\newblock
+  \usebibmacro{in:}%
+  \usebibmacro{journal}%
+  \setunit*{\addspace}%
+  \iffieldundef{series}
+    {}
+    {\newunit
+     \printfield{series}%
+     \setunit{\addspace}}%
+  \printfield{volume}%
+  \printtext{/}
+  \printfield{number}%
+  \setunit{\addspace}%
+  \usebibmacro{issue}%
+  \newunit
+  \usebibmacro{byeditor+others}%
+  \newunit
+  \newunit
+  \usebibmacro{note+pages}%
+  \addcomma\addspace
+  \usebibmacro{date}%
+  \newunit\newblock
+  \iftoggle{bbx:isbn}
+    {\printfield{issn}}
+    {}%
+  \newunit\newblock
+  \usebibmacro{doi+eprint+url}%
+  \newunit\newblock
+  \usebibmacro{addendum+pubstate}%
+  \setunit{\bibpagerefpunct}\newblock
+  \usebibmacro{pageref}%
+  \newunit\newblock
+  \iftoggle{bbx:related}
+    {\usebibmacro{related:init}%
+     \usebibmacro{related}}
+    {}%
+  \usebibmacro{finentry}}
+
+
+% Remove all emphasis and enquoting
+\DeclareFieldFormat*{booktitle}{#1}
+\DeclareFieldFormat*{journaltitle}{#1}
+\DeclareFieldFormat*{title}{#1}

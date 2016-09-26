@@ -107,6 +107,53 @@ Vorname1 Nachname1 und Vorname2 Nachname2}
 %required for pdfcomment later
 \usepackage{xcolor}
 
+%use biblatex+biber instead of bibtex
+\input{lni-biblatex.tex}
+\bibliography{paper}
+
+%Do not put "vd" in the label, but put it at "\citeauthor"
+%Source: http://tex.stackexchange.com/a/30277/9075
+\makeatletter
+\AtBeginDocument{\toggletrue{blx@useprefix}}
+\AtBeginBibliography{\togglefalse{blx@useprefix}}
+
+%Thin spaces between initials
+%http://tex.stackexchange.com/a/11083/9075
+\renewrobustcmd*{\bibinitdelim}{\,}
+
+%Keep first and last name together in the bibliography
+%http://tex.stackexchange.com/a/196192/9075
+\renewcommand*\bibnamedelimc{\addnbspace}
+\renewcommand*\bibnamedelimd{\addnbspace}
+
+%Replace last "and" by comma in bibliography
+%See http://tex.stackexchange.com/a/41532/9075
+\AtBeginBibliography{%
+  \renewcommand*{\finalnamedelim}{\addcomma\space}%
+}
+
+\DefineBibliographyStrings{ngerman}{
+  backrefpage  = {zitiert auf S\adddot},
+  backrefpages = {zitiert auf S\adddot},
+  andothers    = {et\ \addabbrvspace al\adddot},
+  byeditor     = {Hrsg.},
+  bibliography = {Literatur}
+}
+
+%enable hyperlinked author names when using \citeauthor
+%source: http://tex.stackexchange.com/a/75916/9075
+\DeclareCiteCommand{\citeauthor}
+  {\boolfalse{citetracker}%
+   \boolfalse{pagetracker}%
+   \usebibmacro{prenote}}
+  {\ifciteindex
+     {\indexnames{labelname}}
+     {}%
+   \printtext[bibhyperref]{\printnames{labelname}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+
+
 % new packages BEFORE hyperref
 % See also http://tex.stackexchange.com/questions/1863/which-packages-should-be-loaded-after-hyperref-instead-of-before
 
@@ -186,6 +233,7 @@ Vorname2 Nachname2\footnote{Einrichtung/Universität, Abteilung, Anschrift, Post
 und weitere Autorinnen und Autoren in der gleichen Notation}
 
 \title{Der Titel des Beitrags, der auch etwas länger sein und über zwei Zeilen reichen kann}
+
 
 \begin{document}
 \maketitle
@@ -331,9 +379,8 @@ Für Proceedings und Seminarbände ist die Seitennummerierung, wenn nicht anders
 \end{itemize}
 \end{itemize}
 
-%DO NOT USE \bibliographystyle - is is already done in lni.cls
-%\bibliographystyle{lnig}
-
-\bibliography{paper}
+%No \bibliography{paper} allowed here - biblatex expects it at the preamble
+%Run `biber paper` to generate the bibliography
+\printbibliography
 
 \end{document}
